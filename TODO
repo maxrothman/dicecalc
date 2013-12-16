@@ -10,4 +10,4 @@ returns some result to be tabulated
 user specifies analyses, which are returned as a dict
 calculate(pool, rules) -> {result: probability}
 class die: different input forms (num sides, start-end-[step], collection, (num, chance), etc.
-	-converts to itterable usable by itertools.
+	-converts to iterable usable by itertools.
