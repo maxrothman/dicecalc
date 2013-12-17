@@ -28,39 +28,56 @@ def _normalize(stuff):
   total = float(sum(stuff.values()))
   return dict([(k, v/total) for k,v in stuff.items()])
 
-class die(object):
-  """Internal representation for dice.
-  Constructor can take several different types of input:
-    - Number of sides (named by number)
+def die(*args):
+  """Converts to internal representation for a die.
+  Can take several different types of input:
+    - Number of sides
     - Smallest side, largest side [, step]
     - Iterable of sides
-    - Iterable of (side, chance) where all chances sum to 1
+    - Iterable of chances where all chances sum to 1
       Chance can be an instance of fractions.Fraction or 0<=chance<=1
+      Can be either simple iterable or dict of sides -> chances
   In all cases, sides must be hashable.
   """
-  #TODO: if dict not provided, enumerate
   #TODO: verify that sides are hashable
   #TODO: verify chances add up to 100%
-  def __init__(self, *args):
-    if all(isinstance(i, int) for i in args):
-      if len(args)==1:
-        self.die = tuple(range(1, args[0]+1))   # num sides
-      elif (len(args)==2 or len(args)==3):
-        self.die = tuple(range(*args))          # start, stop [, step]
-      else:
+  if all(isinstance(i, int) for i in args):
+    if len(args)==1:
+      therange = range(1, args[0]+1)     # num sides
+    elif len(args) in (2, 3):
+      args = list(args)
+      args[1] += 1
+      therange = range(*args)         # start, stop [, step]
+    else:
+      pass
+      #TODO: throw error
+     
+    return {i: Fraction(1, len(therange)) for i in therange}
+  
+  elif len(args)==1 and isinstance(args[0], Iterable):
+    thedice = args[0]
+    
+    if not isinstance(thedice, dict):
+      thedice = dict(enumerate(thedice, 1))
+    
+    if all(isinstance(i, Fraction) for i in thedice.values()): 
+      pass                                              # {side:Fraction, ...}
+    elif all(0<=i<=1 for i in thedice.values()):
+      for k,v in thedice.items():
+        thedice[k] = Fraction(v).limit_denominator()    # {side: 0<x<1, ...}
+    else:
+      try:
+        thedice = {v: Fraction(1, len(thedice)) for v in thedice.values()}    # [side, side, ...]
+      except TypeError:
+        pass
         #TODO: throw error
-    elif len(args)==1 and isinstance(args[0], Iterable):
-      thedice = args[0]
-      if all(isinstance(i, Iterable) and len(i)==2 for i in thedice):  # [(side, chance), (side, chance), ...]
-        if not all(isinstance(i[1], Fraction) for i in thedice):
-          thedice = map(lambda x: (x[0], Fraction(x[1]).limit_denominator(10**x[1])), args)
+  
+    return thedice
 
-        lcm = reduce(lambda a,b: a*b // gcd(a,b), (c.denominator for s,c in thedice))  # least common mult of denoms
-        thedice = [(side, chance.numerator*(lcm//chance.denominator)) for side, chance in thedice]
+  else:
+    pass
+    #TODO: throw error
 
-        self.die = tuple(sum(([side]*num for side,num in thedice), []))
-      else:
-        self.die = tuple(args[0])               # [side1, side2, side3, ...]
 
 
 class memoized(object):
