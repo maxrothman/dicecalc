@@ -14,13 +14,22 @@ def test_die():
   assert die({'red':.25, 'blue':.75}) == {'red':Fraction(1,4), 'blue':Fraction(3,4)}
   
   # Should fail
-  assertraises(TypeError, die, [[1,2], [3,4]])
-  assertraises(TypeError, die, {[1]:.5, [2]:.5})
-  assertraises(ValueError, die, [.25, .25])
+  err = "side names must be hashable, unhashable type: 'list'"
+  assertraises(TypeError(err), die, [[1,2], [3,4]])
+  
+  err = "die expected at most 3 int arguments, got 4"
+  assertraises(TypeError(err), die, 1, 1, 1, 1)
+  
+  err = "die expected at most 3 int or 1 iterable arguments"
+  assertraises(TypeError(err), die)
+  assertraises(TypeError(err), die, 'red', 'blue')
+  
+  err = "die expected Fraction objects or 0<=x<=1 for values"
+  assertraises(TypeError(err), die, {1:2, 3:4, 5:6})
+  
+  #Not yet implimented
   assertraises(ValueError, die, [Fraction(1,4), Fraction(1,4)])
-  assertraises(TypeError, die, 1, 1, 1, 1)
-  assertraises(TypeError, die)
-  assertraises(TypeError, die, 'red', 'blue')
+  assertraises(ValueError, die, [.25, .25])
 
 def test_normalize():
   stuff = {1:3, 2:20e10, 3:1e-20}
@@ -35,6 +44,8 @@ def assertraises(exception, func, *args, **kwargs):
     func(*args, **kwargs)
   except exception:
     pass
+  else:
+    raise AssertionError
 
 if __name__ == '__main__':
   test_normalize()

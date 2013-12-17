@@ -6,9 +6,8 @@ __email__ = 'whereswalden90@gmail.com'
 __version__ = '1.0'
 __license__ = 'GPL v2'
 
-from collections import Counter, Iterable
-from itertools import product
-from fractions import Fraction, gcd
+from collections import Counter, Iterable, Sequence
+from fractions import Fraction
 
 def calculate(pool, rules=sum):
   """Calculates results of a pool given a ruleset.
@@ -39,7 +38,6 @@ def die(*args):
       Can be either simple iterable or dict of sides -> chances
   In all cases, sides must be hashable.
   """
-  #TODO: verify that sides are hashable
   #TODO: verify chances add up to 100%
   if all(isinstance(i, int) for i in args):
     if len(args)==1:
@@ -49,34 +47,36 @@ def die(*args):
       args[1] += 1
       therange = range(*args)         # start, stop [, step]
     else:
-      pass
-      #TODO: throw error
+      raise TypeError("die expected at most 3 int arguments, got " + len(args))
      
     return {i: Fraction(1, len(therange)) for i in therange}
   
   elif len(args)==1 and isinstance(args[0], Iterable):
     thedice = args[0]
     
-    if not isinstance(thedice, dict):
-      thedice = dict(enumerate(thedice, 1))
-    
-    if all(isinstance(i, Fraction) for i in thedice.values()): 
-      pass                                              # {side:Fraction, ...}
-    elif all(0<=i<=1 for i in thedice.values()):
-      for k,v in thedice.items():
-        thedice[k] = Fraction(v).limit_denominator()    # {side: 0<x<1, ...}
-    else:
-      try:
-        thedice = {v: Fraction(1, len(thedice)) for v in thedice.values()}    # [side, side, ...]
-      except TypeError:
-        pass
-        #TODO: throw error
-  
-    return thedice
+    if isinstance(thedice, Sequence):
+      if all(isinstance(i, Fraction) for i in thedice) or all(0<=i<=1 for i in thedice):
+        thedice = dict(enumerate(thedice, 1))   # sequence of chances, prep for dict block
+      else:                                     # sequence of side names
+        try:
+          thedice = Counter(args[0])
+          return {k: Fraction(v, len(args[0])) for k,v in thedice.items()}
+        except TypeError as e:
+          raise TypeError("side names must be hashable, " + e.message)
 
+    if isinstance(thedice, dict):
+      if all(isinstance(i, Fraction) for i in thedice):
+        pass
+      elif all(0<=i<=1 for i in thedice):
+        for k,v in thedice:
+          thedice[k] = Fraction(v).limit_denominator()
+      else:
+        raise TypeError("die expected Fraction objects or 0<=x<=1 for values")
+       
+      return thedice
+  
   else:
-    pass
-    #TODO: throw error
+    raise TypeError("die expected at most 3 int or 1 iterable arguments")
 
 
 
