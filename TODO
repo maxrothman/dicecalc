@@ -28,3 +28,5 @@ tabulated = {0: 0.343, 1: 0.147*3, 2: 0.063*3, 3: 0.027}
 compare to checking all combinations of all sides, then checking rules
 
 To optimize this, we'll first have to run rules on every side on each given die once and construct the chance dict.
+
+Better performance: pre-tabulate sets of combs of dice with the number of times each occurs, then feed each to rules once 
