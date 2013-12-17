@@ -10,4 +10,21 @@ returns some result to be tabulated
 user specifies analyses, which are returned as a dict
 calculate(pool, rules) -> {result: probability}
 class die: different input forms (num sides, start-end-[step], collection, (num, chance), etc.
-	-converts to iterable usable by itertools.
+	-DEPRICATED converts to iterable usable by itertools.
+
+--------
+Internal representation of dice: {side: chance, ...}
+When calculating results:
+for comb in unique_combinations_of_sides:
+	comb_chance = product(chance for side, chance in comb)
+	tabulated[rules(comb)] += comb_chance
+
+Ex: 3d10 whitewolf (8+)
+die = {0:7/10, 1:3/10}
+unique combinations: [(0,0,0), (1,0,0), (0,1,0), (1,1,0), (0,0,1), (1,0,1), (0,1,1), (1,1,1)]
+comb_chances: [(3/10*7/10*7/10), ...]
+tabulated = {0: 0.343, 1: 0.147*3, 2: 0.063*3, 3: 0.027}
+
+compare to checking all combinations of all sides, then checking rules
+
+To optimize this, we'll first have to run rules on every side on each given die once and construct the chance dict.
