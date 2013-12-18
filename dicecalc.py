@@ -6,26 +6,33 @@ __email__ = 'whereswalden90@gmail.com'
 __version__ = '1.0'
 __license__ = 'GPL v2'
 
-from collections import Counter, Iterable, Sequence
+from collections import Counter, defaultdict, Iterable, Sequence, Hashable
 from fractions import Fraction
+import itertools
+import operator
+
 
 def calculate(pool, rules=sum):
   """Calculates results of a pool given a ruleset.
-  Input: pool  - an iterable of dicecalc.die objects
+  Input: pool  - an iterable of the die representation returned by dicecalc.die()
          rules - a function that will be applied to every result.
                  Uses sum by default.
   """
   #TODO: check validity of rules function
   rules = memoized(rules)     # Memoize rules func for performance
-  results = Counter()
-  for i in itertools.product(*pool):
-    results[rules(i)] += 1
-  return _normalize(results)
+#  results = Counter()
+  results = defaultdict(lambda: 0)
+  for comb in itertools.product(*pool):
+    results[rules(comb)] += reduce(operator.mul, (pool[i][comb[i]] for i in range(len(comb))))
+  return dict(results)
+
 
 def _normalize(stuff):
+  # NOT USED
   "Given a dict mapping items to counts, returns a normalized dict mapping items to decimal percentages"
   total = float(sum(stuff.values()))
   return dict([(k, v/total) for k,v in stuff.items()])
+
 
 def die(*args):
   """Converts to internal representation for a die.
@@ -92,7 +99,7 @@ class memoized(object):
       self.func = func
       self.cache = {}
    def __call__(self, *args):
-      if not isinstance(args, collections.Hashable):
+      if not isinstance(args, Hashable):
          # uncacheable. a list, for instance.
          # better to not cache than blow up.
          return self.func(*args)

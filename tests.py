@@ -37,7 +37,8 @@ def test_normalize():
   assert stuff.keys() == _normalize(stuff).keys()
 
 def test_calculate():
-  pass
+  # (pool, rules, expected_result)
+  pools = [([die({0:.7, 1:.3}) for _ in range(3)], lambda x: x.count(1), {0:
 
 def assertraises(exception, msg, func, *args, **kwargs):
   try:
