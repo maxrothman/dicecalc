@@ -31,10 +31,27 @@ def test_die():
   assertraises(ValueError, err, die, [Fraction(1,4), Fraction(1,4)])
   assertraises(ValueError, err, die, [.25, .25])
 
-def test_normalize():
-  stuff = {1:3, 2:20e10, 3:1e-20}
-  assert abs(sum(_normalize(stuff).values()) - 1) <= .000001
-  assert stuff.keys() == _normalize(stuff).keys()
+#def test_normalize():
+#  stuff = {1:3, 2:20e10, 3:1e-20}
+#  assert abs(sum(_normalize(stuff).values()) - 1) <= .000001
+#  assert stuff.keys() == _normalize(stuff).keys()
+
+def test_analyses():
+  pool = [die(4)]*2
+  results = calculate(pool)
+  assert mean(results) == 5.0
+  assert median(results) == 3.0
+  assert mode(results) == 5
+  assert abs(std_dev(results)) - 1.58 < 1e2
+  
+  atleast = [None, None, 100.0, 93.75, 81.25, 62.4, 37.5, 18.75, 6.25]
+  for k in results:
+    assert abs(at_least(k, results) - atleast[k]) < 1e2
+
+  atmost = [None, None, 6.25, 18.75, 37.5, 62.4, 81.25, 93.75, 100.0]
+  for k in results:
+    assert abs(at_most(k, results) - atmost[k]) < 1e2
+
 
 def test_calculate():
   # (pool, rules, expected_result)
@@ -67,7 +84,8 @@ def assertraises(exception, msg, func, *args, **kwargs):
     raise AssertionError("No error raised")
 
 if __name__ == '__main__':
-  test_normalize()
+  #  test_normalize()
   test_calculate()
   test_die()
+  test_analyses()
   print "Tests pass"

@@ -10,28 +10,32 @@ from collections import Counter, defaultdict, Iterable, Sequence, Hashable
 from fractions import Fraction
 import itertools
 import operator
+from math import sqrt
 
 
-def calculate(pool, rules=sum):
+def calculate(pool, rules=sum, fractions=False):
   """Calculates results of a pool given a ruleset.
-  Input: pool  - an iterable of the die representation returned by dicecalc.die()
-         rules - a function that will be applied to every result.
-                 Uses sum by default.
+  Input: pool      - an iterable of the die representation returned by dicecalc.die()
+         rules     - a function that will be applied to every result.
+                     Uses sum by default.
+         fractions - if True, returns fractions.Fraction objects instead of floats.
+                     False by default.
   """
   #TODO: check validity of rules function
   rules = memoized(rules)     # Memoize rules func for performance
-#  results = Counter()
+  #results = Counter()
   results = defaultdict(lambda: 0)
   for comb in itertools.product(*pool):
     results[rules(comb)] += reduce(operator.mul, (pool[i][comb[i]] for i in range(len(comb))))
+  if not fractions: results = {k:float(v) for k,v in results.items()}
   return dict(results)
 
 
-def _normalize(stuff):
-  # NOT USED
-  "Given a dict mapping items to counts, returns a normalized dict mapping items to decimal percentages"
-  total = float(sum(stuff.values()))
-  return dict([(k, v/total) for k,v in stuff.items()])
+#def _normalize(stuff):
+#  # NOT USED
+#  "Given a dict mapping items to counts, returns a normalized dict mapping items to decimal percentages"
+#  total = float(sum(stuff.values()))
+#  return dict([(k, v/total) for k,v in stuff.items()])
 
 
 def die(*args):
@@ -87,6 +91,31 @@ def die(*args):
   else:
     raise TypeError("die expected at most 3 int or 1 iterable arguments")
 
+
+def median(results):
+  "Return the median of the given distribution"
+  return (max(results) - min(results))/2.0
+
+def mean(results):
+  "Return the mean of the given distribution"
+  return float(sum(k*v for k,v in results.items()))
+
+def mode(results):
+  "Return the mode of the given distribution"
+  return max(results, key=lambda x: results[x])
+
+def std_dev(results):
+  "Return the standard deviation of the given distribution"
+  u = mean(results)
+  return sqrt(sum((k-u)**2 * v for k,v in results.items()))
+
+def at_least(x, results):
+  "Return the probability of getting at least the result x"
+  return float(sum(v for k,v in results.items() if k>=x))
+
+def at_most(x, results):
+  "Return the probability of getting at most the result x"
+  return float(sum(v for k,v in results.items() if k<=x))
 
 
 class memoized(object):
