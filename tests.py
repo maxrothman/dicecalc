@@ -38,8 +38,23 @@ def test_normalize():
 
 def test_calculate():
   # (pool, rules, expected_result)
-  pools = [([die({0:.7, 1:.3}) for _ in range(3)], lambda x: x.count(1), {0:
+  pools = [
+           ([die(4)]*2, None, {2:.0625, 3:.125, 4:.1875, 5:.25, 6:.1875, 7:.125, 8:.0625}),  #2d4
+           ([die({0:.7, 1:.3})]*3, lambda x: x.count(1), {0:.343, 1:.441, 2:.189, 3:.027}),   #3 whitewolf d10
+           ([die(8)]*4, lambda x: max(x.count(i) for i in x), {1:.4102, 2:.5332, 3:.0547, 4:.002})  #2 ORE d8
+          ]
+  for pool, rules, expected_result in pools:
+    result = calculate(pool, rules) if rules else calculate(pool)
+    result = {k:float(v) for k,v in result.items()}
+    try:
+      assert all(abs(result[k] - expected_result[k]) < 1e-4 for k in result)
+    except AssertionError:
+      print "Pool: " + str(pool)
+      print "Expected: " + str(expected_result)
+      print "Got:      " + str(result)
+      raise
 
+####################################################
 def assertraises(exception, msg, func, *args, **kwargs):
   try:
     func(*args, **kwargs)
