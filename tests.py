@@ -15,21 +15,21 @@ def test_die():
   
   # Should fail
   err = "side names must be hashable, unhashable type: 'list'"
-  assertraises(TypeError(err), die, [[1,2], [3,4]])
+  assertraises(TypeError, err, die, [[1,2], [3,4]])
   
   err = "die expected at most 3 int arguments, got 4"
-  assertraises(TypeError(err), die, 1, 1, 1, 1)
+  assertraises(TypeError, err, die, 1, 1, 1, 1)
   
   err = "die expected at most 3 int or 1 iterable arguments"
-  assertraises(TypeError(err), die)
-  assertraises(TypeError(err), die, 'red', 'blue')
+  assertraises(TypeError, err, die)
+  assertraises(TypeError, err, die, 'red', 'blue')
   
   err = "die expected Fraction objects or 0<=x<=1 for values"
-  assertraises(TypeError(err), die, {1:2, 3:4, 5:6})
+  assertraises(TypeError, err, die, {1:2, 3:4, 5:6})
   
-  #Not yet implimented
-  assertraises(ValueError, die, [Fraction(1,4), Fraction(1,4)])
-  assertraises(ValueError, die, [.25, .25])
+  err = "total chance for all sides must sum to 1"
+  assertraises(ValueError, err, die, [Fraction(1,4), Fraction(1,4)])
+  assertraises(ValueError, err, die, [.25, .25])
 
 def test_normalize():
   stuff = {1:3, 2:20e10, 3:1e-20}
@@ -39,13 +39,16 @@ def test_normalize():
 def test_calculate():
   pass
 
-def assertraises(exception, func, *args, **kwargs):
+def assertraises(exception, msg, func, *args, **kwargs):
   try:
     func(*args, **kwargs)
-  except exception:
-    pass
+  except exception as e:
+    if e.message == msg:
+      pass
+    else:
+      raise AssertionError("Incorrect error message: expected '"+msg+"', got '"+e.message+"'")
   else:
-    raise AssertionError
+    raise AssertionError("No error raised")
 
 if __name__ == '__main__':
   test_normalize()

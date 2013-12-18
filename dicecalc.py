@@ -38,8 +38,7 @@ def die(*args):
       Can be either simple iterable or dict of sides -> chances
   In all cases, sides must be hashable.
   """
-  #TODO: verify chances add up to 100%
-  if all(isinstance(i, int) for i in args):
+  if args and all(isinstance(i, int) for i in args):    # all() returns true if there are no args
     if len(args)==1:
       therange = range(1, args[0]+1)     # num sides
     elif len(args) in (2, 3):
@@ -47,7 +46,7 @@ def die(*args):
       args[1] += 1
       therange = range(*args)         # start, stop [, step]
     else:
-      raise TypeError("die expected at most 3 int arguments, got " + len(args))
+      raise TypeError("die expected at most 3 int arguments, got " + str(len(args)))
      
     return {i: Fraction(1, len(therange)) for i in therange}
   
@@ -65,14 +64,17 @@ def die(*args):
           raise TypeError("side names must be hashable, " + e.message)
 
     if isinstance(thedice, dict):
-      if all(isinstance(i, Fraction) for i in thedice):
+      if all(isinstance(i, Fraction) for i in thedice.values()):   # {side:Fraction, ...}
         pass
-      elif all(0<=i<=1 for i in thedice):
-        for k,v in thedice:
+      elif all(0<=i<=1 for i in thedice.values()):                 # {side: 0<x<1, ...}
+        for k,v in thedice.items():
           thedice[k] = Fraction(v).limit_denominator()
       else:
         raise TypeError("die expected Fraction objects or 0<=x<=1 for values")
-       
+
+      if sum(thedice.values()) != 1:
+        raise ValueError("total chance for all sides must sum to 1")
+
       return thedice
   
   else:
