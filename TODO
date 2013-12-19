@@ -1,0 +1,7 @@
+Goals for v1.1:
+ - Explicitly allow recursion (e.g. 10s explode in White Wolf)
+   - give rules function access to die that produced each result
+   - allow setting of recursion limit as optional arg to calculate
+
+Goals for the future:
+ - Optimization. All the optimization.
