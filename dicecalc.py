@@ -10,19 +10,20 @@ from collections import Counter, defaultdict, Iterable, Sequence, Hashable
 from fractions import Fraction
 import itertools
 import operator
-from math import sqrt
+import math
 
 
 def calculate(pool, rules=sum, fractions=False):
   """Calculates results of a pool given a ruleset.
   Input: pool      - an iterable of the die representation returned by dicecalc.die()
-         rules     - a function that will be applied to every result.
+         rules     - a function that takes as input an iterable of side names and returns 
+                     some result. Will be applied to every combination of sides.
                      Uses sum by default.
          fractions - if True, returns fractions.Fraction objects instead of floats.
                      False by default.
   """
   #TODO: check validity of rules function
-  rules = memoized(rules)     # Memoize rules func for performance
+  rules = _memoized(rules)     # Memoize rules func for performance
   #results = Counter()
   results = defaultdict(lambda: 0)
   for comb in itertools.product(*pool):
@@ -39,7 +40,7 @@ def calculate(pool, rules=sum, fractions=False):
 
 
 def die(*args):
-  """Converts to internal representation for a die.
+  """Converts input to internal representation for a die.
   Can take several different types of input:
     - Number of sides
     - Smallest side, largest side [, step]
@@ -107,7 +108,7 @@ def mode(results):
 def std_dev(results):
   "Return the standard deviation of the given distribution"
   u = mean(results)
-  return sqrt(sum((k-u)**2 * v for k,v in results.items()))
+  return math.sqrt(sum((k-u)**2 * v for k,v in results.items()))
 
 def at_least(x, results):
   "Return the probability of getting at least the result x"
@@ -118,7 +119,7 @@ def at_most(x, results):
   return float(sum(v for k,v in results.items() if k<=x))
 
 
-class memoized(object):
+class _memoized(object):
    '''Decorator. Caches a function's return value each time it is called.
    If called later with the same arguments, the cached value is returned
    (not reevaluated).
