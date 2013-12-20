@@ -1,5 +1,5 @@
 from dicecalc import *
-from dicecalc import _normalize
+#from dicecalc import _normalize
 from fractions import Fraction
 
 def test_die():

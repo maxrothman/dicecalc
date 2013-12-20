@@ -19,7 +19,7 @@ def rules_whitewolf(pool):
 whitewolf_try1 = dicecalc.calculate( [dicecalc.die(10)]*4 , rules_whitewolf )
 
 # But this would run much faster:
-whitewolf_try2 = dicecalc.calculate( [dicecalc.die([0.7, 0.3])]*4 )
+whitewolf_try2 = dicecalc.calculate( [dicecalc.die({0: 0.7, 1: 0.3})]*4 )
 
 # If you wanted to analyze the same rules for d6, you'd have to do this:
 from fractions import Fraction
