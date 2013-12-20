@@ -12,22 +12,39 @@ import itertools
 import operator
 import math
 
+global RECURSION_LIMIT, CURRENT_CALL
+RECURSION_LIMIT = CURRENT_CALL = None
 
-def calculate(pool, rules=sum, fractions=False):
+def calculate(pool, rules=sum, fractions=False, recursion_limit=1):
   """Calculates results of a pool given a ruleset.
-  Input: pool      - an iterable of the die representation returned by dicecalc.die()
-         rules     - a function that takes as input an iterable of side names and returns 
-                     some result. Will be applied to every combination of sides.
-                     Uses sum by default.
-         fractions - if True, returns fractions.Fraction objects instead of floats.
-                     False by default.
+  Input: 
+    pool            - an iterable of the die representation returned by dicecalc.die()
+    rules           - a function that takes as input an iterable of side names and returns 
+                      some result. Will be applied to every combination of sides.
+                      Uses sum by default.
+    fractions       - if True, returns fractions.Fraction objects instead of floats.
+                      False by default.
+    recursion_limit - sets the maximum recursion depth of this call of calculate().
+                      1 by default (no recursion).
   """
   #TODO: check validity of rules function
+  global RECURSION_LIMIT, CURRENT_CALL
+  if RECURSION_LIMIT == None:
+    RECURSION_LIMIT = recursion_limit
+  if CURRENT_CALL == None:
+    CURRENT_CALL = 0
+  
+  if CURRENT_CALL >= RECURSION_LIMIT:
+    return
+  else:
+    CURRENT_CALL += 1
+  
   rules = _memoized(rules)     # Memoize rules func for performance
   #results = Counter()
   results = defaultdict(lambda: 0)
   for comb in itertools.product(*pool):
     results[rules(comb)] += reduce(operator.mul, (pool[i][comb[i]] for i in range(len(comb))))
+  CURRENT_CALL = RECURSION_LIMIT = None   # any recursion was gonna happen in rules()
   if not fractions: results = {k:float(v) for k,v in results.items()}
   return dict(results)
 

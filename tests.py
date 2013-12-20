@@ -1,5 +1,5 @@
 from dicecalc import *
-from dicecalc import _normalize
+#from dicecalc import _normalize
 from fractions import Fraction
 
 def test_die():
@@ -70,6 +70,15 @@ def test_calculate():
       print "Expected: " + str(expected_result)
       print "Got:      " + str(result)
       raise
+  
+  pool = [die({0:.5, 1:.5})]
+  def explode_rules(pool):
+    result = 0
+    for i in pool:
+      if i >= 8: result += 1
+      if i == 10: result
+  assert max(calculate(pool, recursion_limit=4)) == 4
+  assert max(calculate(pool, recursion_limit=5)) == 5
 
 ####################################################
 def assertraises(exception, msg, func, *args, **kwargs):
