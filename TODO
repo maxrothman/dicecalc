@@ -1,7 +1,20 @@
 Goals for v1.1:
  - Explicitly allow recursion (e.g. 10s explode in White Wolf)
-   - give rules function access to die that produced each result
-   - allow setting of recursion limit as optional arg to calculate
+   - give rules function access to die that produced each result (they made them, indexes will be the same) DONE
+   - allow setting of recursion limit as optional arg to calculate DONE
+   - current function signatures don't allow for recursion (how does rules pick which result to return?)
+
+Strategy for recursion:
+   - write die class
+   - treat as custom datatype with implimentations of builtins
+   - e.g. __add__ = find the distribution that results from rolling both together
+   - ACTUALLY FASTER! NdS w/ itertools.product: O(S^N). Using SUM(2..N){ ((N-1)*s - (n-2))*s }: O((N+M)^3) IT'S P!
+   - equivalent to reduce(f, [dice])
+
+Implimentation:
+   - each die is a distribution
+   - operations take 2 distributions and produce a third
+   - introspection vs __leq__, __eq__, etc where 1 arg is a number
 
 Goals for the future:
  - Optimization. All the optimization.
