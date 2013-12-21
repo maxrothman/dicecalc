@@ -16,5 +16,9 @@ Implimentation:
    - operations take 2 distributions and produce a third
    - introspection vs __leq__, __eq__, etc where 1 arg is a number
 
+Problems:
+   - can't use list.count(), max(), other builtins
+   - possible solution: die.__call__ or w/e adds a die to a list so the whole thing can be iterated over later
+
 Goals for the future:
  - Optimization. All the optimization.
